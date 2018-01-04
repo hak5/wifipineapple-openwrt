@@ -731,6 +731,15 @@ define Device/oolite
 endef
 TARGET_DEVICES += oolite
 
+define Device/pineapple-nano
+    $(Device/tplink-16mlzma)
+    BOARDNAME := PINEAPPLE-NANO
+    DEVICE_PROFILE := HAK5_PINEAPPLE_NANO
+    TPLINK_HWID := 0x4e414e4f
+    CONSOLE := ttyATH0,115200
+endef
+TARGET_DEVICES += pineapple-nano
+
 rootfs_type=$(patsubst jffs2-%,jffs2,$(patsubst squashfs-%,squashfs,$(1)))
 
 # $(1): rootfs type.
@@ -1061,6 +1070,7 @@ mynet_n600_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,64k(devdat
 mynet_rext_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,7808k(firmware),64k(nvram)ro,64k(ART)ro
 zyx_nbg6716_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(env)ro,64k(RFdata)ro,-(nbu);ar934x-nfc:2048k(zyxel_rfsd),2048k(romd),1024k(header),2048k(kernel),-(ubi)
 qihoo_c301_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env),64k(devdata),64k(devconf),15744k(firmware),64k(warm_start),64k(action_image_config),64k(radiocfg)ro;spi0.1:15360k(upgrade2),1024k(privatedata)
+pineapple_tetra_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,256k(u-boot-env),256k(caldata),-(mb0);ar934x-nfc:2048k(kernel),-(ubi)
 
 
 define Image/BuildKernel
@@ -1769,7 +1779,7 @@ define Image/Build/NetgearNAND
 	$(eval imageraw=$(KDIR_TMP)/$(2)-raw.img)
 	$(CP) $(KDIR)/root.squashfs-raw $(KDIR_TMP)/root.squashfs
 	echo -ne '\xde\xad\xc0\xde' > $(KDIR_TMP)/jffs2.eof
-	$(call ubinize,ubinize-$(9).ini,$(KDIR_TMP),$(KDIR_TMP)/$(2)-root.ubi,128KiB,2048,-E 5)
+	$(call ubinize,ubinize-$(9).ini,$(KDIR_TMP),$(KDIR_TMP)/$(2)-root.ubi,512KiB,4096,-E 5)
 	( \
 		dd if=$(KDIR_TMP)/vmlinux-$(2).uImage; \
 		dd if=$(KDIR_TMP)/$(2)-root.ubi \
@@ -2150,6 +2160,8 @@ ifeq ($(SUBTARGET),nand)
 $(eval $(call SingleProfile,NetgearNAND,64k,WNDR3700V4,wndr3700v4,WNDR3700_V4,ttyS0,115200,$$(wndr4300_mtdlayout),0x33373033,WNDR3700v4,"",-H 29763948+128+128,wndr4300))
 $(eval $(call SingleProfile,NetgearNAND,64k,WNDR4300V1,wndr4300,WNDR4300,ttyS0,115200,$$(wndr4300_mtdlayout),0x33373033,WNDR4300,"",-H 29763948+0+128+128+2x2+3x3,wndr4300))
 $(eval $(call SingleProfile,NetgearNAND,64k,R6100,r6100,R6100,ttyS0,115200,$$(r6100_mtdlayout),0x36303030,R6100,"",-H 29764434+0+128+128+2x2+2x2,wndr4300))
+
+$(eval $(call SingleProfile,NetgearNAND,64k,HAK5_PINEAPPLE_TETRA,pineapple-tetra,PINEAPPLE-TETRA,ttyS0,115200,$$(pineapple_tetra_mtdlayout),0x33373033,PINEAPPLE_TETRA,"",-H 29763948+0+128+128+2x2+3x3,pineapple-tetra))
 
 $(eval $(call SingleProfile,ZyXELNAND,128k,NBG6716,nbg6716,NBG6716,ttyS0,115200,NBG6716,$$(zyx_nbg6716_mtdlayout),mem=256M))
 

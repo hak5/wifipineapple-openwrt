@@ -20,6 +20,16 @@
 
 #define DNI_HDR_LEN	128
 
+#define COL(x)      "\033[;" #x "m"  
+#define RED         COL(31)  
+#define GREEN       COL(32)  
+#define YELLOW      COL(33)  
+#define BLUE        COL(34)  
+#define MAGENTA     COL(35)  
+#define CYAN        COL(36)  
+#define WHITE       COL(0)  
+#define GRAY        "\033[0m"  
+
 /*
  * Globals
  */
@@ -31,20 +41,30 @@ static char *region = "";
 static char *hd_id;
 
 static char *board_id;
+
+/*
+ * special board that do not have infomation header
+ * */
+static char *board_spec[] = {
+	"PINEAPPLE_TETRA",
+	"WNDR4300",
+//  "WNDR3700v4",
+};
+
 /*
  * Message macros
  */
 #define ERR(fmt, ...) do { \
-	fflush(0); \
-	fprintf(stderr, "[%s] *** error: " fmt "\n", \
-			progname, ## __VA_ARGS__ ); \
+fflush(0); \
+fprintf(stderr, "[%s] *** error: " fmt "\n", \
+	progname, ## __VA_ARGS__ ); \
 } while (0)
 
 #define ERRS(fmt, ...) do { \
-	int save = errno; \
-	fflush(0); \
-	fprintf(stderr, "[%s] *** error: " fmt "\n", \
-			progname, ## __VA_ARGS__, strerror(save)); \
+int save = errno; \
+fflush(0); \
+fprintf(stderr, "[%s] *** error: " fmt "\n", \
+	progname, ## __VA_ARGS__, strerror(save)); \
 } while (0)
 
 void usage(int status)
@@ -54,18 +74,34 @@ void usage(int status)
 
 	fprintf(stream, "Usage: %s [OPTIONS...]\n", progname);
 	fprintf(stream,
-"\n"
-"Options:\n"
-"  -B <board>      create image for the board specified with <board>\n"
-"  -i <file>       read input from the file <file>\n"
-"  -o <file>       write output to the file <file>\n"
-"  -v <version>    set image version to <version>\n"
-"  -r <region>     set image region to <region>\n"
-"  -H <hd_id>      set image hardware id to <hd_id>\n"
-"  -h              show this screen\n"
-	);
+		"\n"
+		"Options:\n"
+		"  -B <board>      create image for the board specified with <board>\n"
+		"  -i <file>       read input from the file <file>\n"
+		"  -o <file>       write output to the file <file>\n"
+		"  -v <version>    set image version to <version>\n"
+		"  -r <region>     set image region to <region>\n"
+		"  -H <hd_id>      set image hardware id to <hd_id>\n"
+		"  -h              show this screen\n"
+		);
 
 	exit(status);
+}
+
+char is_board_spec(char **board_buf, char *board_id, 
+	unsigned int board_buf_len)
+{
+	unsigned int index;
+	char is_spec = 0;
+
+	for(index=0; index<board_buf_len; ++index){
+		if(strcmp(board_buf[index], board_id) == 0){
+			is_spec = 1;
+			break;
+		}
+	}
+	
+	return is_spec;
 }
 
 int main(int argc, char *argv[])
@@ -74,9 +110,10 @@ int main(int argc, char *argv[])
 	int buflen;
 	int err;
 	struct stat st;
-	char *buf;
+	char *buf = NULL;
 	int pos, rem, i;
 	uint8_t csum;
+	char is_spec = 0;
 
 	FILE *outfile, *infile;
 
@@ -90,28 +127,28 @@ int main(int argc, char *argv[])
 			break;
 
 		switch (c) {
-		case 'B':
+			case 'B':
 			board_id = optarg;
 			break;
-		case 'i':
+			case 'i':
 			ifname = optarg;
 			break;
-		case 'o':
+			case 'o':
 			ofname = optarg;
 			break;
-		case 'v':
+			case 'v':
 			version = optarg;
 			break;
-		case 'r':
+			case 'r':
 			region = optarg;
 			break;
-		case 'H':
+			case 'H':
 			hd_id = optarg;
 			break;
-		case 'h':
+			case 'h':
 			usage(EXIT_SUCCESS);
 			break;
-		default:
+			default:
 			usage(EXIT_FAILURE);
 			break;
 		}
@@ -121,6 +158,9 @@ int main(int argc, char *argv[])
 		ERR("no board specified");
 		goto err;
 	}
+	
+	is_spec = is_board_spec(board_spec, board_id,
+		sizeof(board_spec)/sizeof(board_spec[0]));
 
 	if (ifname == NULL) {
 		ERR("no input file specified");
@@ -138,19 +178,27 @@ int main(int argc, char *argv[])
 		goto err;
 	}
 
-	buflen = st.st_size + DNI_HDR_LEN + 1;
+	if(is_spec)
+		buflen = st.st_size;
+	else
+		buflen = st.st_size + DNI_HDR_LEN + 1;
+
 	buf = malloc(buflen);
+	memset(buf, 0, buflen);
+
 	if (!buf) {
 		ERR("no memory for buffer\n");
 		goto err;
 	}
 
-	memset(buf, 0, DNI_HDR_LEN);
-	pos = snprintf(buf, DNI_HDR_LEN, "device:%s\nversion:V%s\nregion:%s\n",
-		       board_id, version, region);
-	rem = DNI_HDR_LEN - pos;
-	if (pos >= 0 && rem > 1 && hd_id) {
-		snprintf(buf + pos, rem, "hd_id:%s\n", hd_id);
+	if(!is_spec){
+		pos = snprintf(buf, DNI_HDR_LEN, "device:%s\nversion:V%s\nregion:%s\n",
+			board_id, version, region);
+		rem = DNI_HDR_LEN - pos;
+		if (pos >= 0 && rem > 1 && hd_id) {
+			snprintf(buf + pos, rem, "hd_id:%s\n", hd_id);
+		}
+
 	}
 
 	infile = fopen(ifname, "r");
@@ -160,18 +208,25 @@ int main(int argc, char *argv[])
 	}
 
 	errno = 0;
-	fread(buf +  DNI_HDR_LEN, st.st_size, 1, infile);
+
+	if(is_spec)
+		fread(buf, st.st_size, 1, infile);
+	else
+		fread(buf + DNI_HDR_LEN, st.st_size, 1, infile);
+
 	if (errno != 0) {
 		ERRS("unable to read from file %s", ifname);
 		goto err_close_in;
 	}
 
-	csum = 0;
-	for (i = 0; i < (st.st_size + DNI_HDR_LEN); i++)
-		csum += buf[i];
+	if(!is_spec){
+		csum = 0;
+		for (i = 0; i < (st.st_size + DNI_HDR_LEN); i++)
+			csum += buf[i];
 
-	csum = 0xff - csum;
-	buf[st.st_size + DNI_HDR_LEN] = csum;
+		csum = 0xff - csum;
+		buf[st.st_size + DNI_HDR_LEN] = csum;
+	}
 
 	outfile = fopen(ofname, "w");
 	if (outfile == NULL) {
@@ -188,21 +243,21 @@ int main(int argc, char *argv[])
 
 	res = EXIT_SUCCESS;
 
- out_flush:
+	out_flush:
 	fflush(outfile);
 
- err_close_out:
+	err_close_out:
 	fclose(outfile);
 	if (res != EXIT_SUCCESS) {
 		unlink(ofname);
 	}
 
- err_close_in:
+	err_close_in:
 	fclose(infile);
 
- err_free:
+	err_free:
 	free(buf);
 
- err:
+	err:
 	return res;
 }

@@ -120,6 +120,9 @@ tplink_board_detect() {
 	"3C0001"*)
 		model="OOLITE"
 		;;
+	"4e414e4f"*)
+		model="pineapple-nano"
+		;;
 	"3C0002"*)
 		model="MINIBOX_V1"
 		;;
@@ -955,6 +958,12 @@ ar71xx_board_detect() {
 		;;
 	*WHR-HP-G300N)
 		name="whr-hp-g300n"
+		;;
+	*"WiFi Pineapple NANO")
+		name="pineapple-nano"
+		;;
+	*"WiFi Pineapple TETRA")
+		name="pineapple-tetra"
 		;;
 	*ZCN-1523H-2)
 		name="zcn-1523h-2"

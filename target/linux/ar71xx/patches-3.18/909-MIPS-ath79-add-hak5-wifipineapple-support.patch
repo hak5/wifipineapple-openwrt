@@ -1,0 +1,54 @@
+--- a/arch/mips/ath79/Kconfig
++++ b/arch/mips/ath79/Kconfig
+@@ -1401,6 +1401,29 @@ config ATH79_MACH_QIHOO_C301
+ 	select ATH79_DEV_USB
+ 	select ATH79_NVRAM
+ 
++config ATH79_MACH_PINEAPPLE_NANO
++	bool "Hak5 WiFi Pineapple NANO board support"
++	select SOC_AR933X
++	select ATH79_DEV_ETH
++	select ATH79_DEV_GPIO_BUTTONS
++	select ATH79_DEV_LEDS_GPIO
++	select ATH79_DEV_M25P80
++	select ATH79_DEV_USB
++	select ATH79_DEV_WMAC
++
++config ATH79_MACH_PINEAPPLE_TETRA
++	bool "Hak5 WiFi Pineapple TETRA board support"
++	select SOC_AR934X
++	select PCI
++	select ATH79_DEV_AP9X_PCI if PCI
++	select ATH79_DEV_ETH
++	select ATH79_DEV_GPIO_BUTTONS
++	select ATH79_DEV_LEDS_GPIO
++	select ATH79_DEV_NFC
++	select ATH79_DEV_USB
++	select ATH79_DEV_WMAC
++	select ATH79_DEV_M25P80
++
+ endmenu
+ 
+ config SOC_AR71XX
+--- a/arch/mips/ath79/Makefile
++++ b/arch/mips/ath79/Makefile
+@@ -107,6 +107,8 @@ obj-$(CONFIG_ATH79_MACH_ONION_OMEGA)	+=
+ obj-$(CONFIG_ATH79_MACH_PB42)		+= mach-pb42.o
+ obj-$(CONFIG_ATH79_MACH_PB44)		+= mach-pb44.o
+ obj-$(CONFIG_ATH79_MACH_PB92)		+= mach-pb92.o
++obj-$(CONFIG_ATH79_MACH_PINEAPPLE_NANO)	+= mach-pineapple-nano.o
++obj-$(CONFIG_ATH79_MACH_PINEAPPLE_TETRA)	+= mach-pineapple-tetra.o
+ obj-$(CONFIG_ATH79_MACH_QIHOO_C301)	+= mach-qihoo-c301.o
+ obj-$(CONFIG_ATH79_MACH_R6100)		+= mach-r6100.o
+ obj-$(CONFIG_ATH79_MACH_RB4XX)		+= mach-rb4xx.o
+--- a/arch/mips/ath79/machtypes.h
++++ b/arch/mips/ath79/machtypes.h
+@@ -105,6 +105,8 @@ enum ath79_mach_type {
+ 	ATH79_MACH_ONION_OMEGA,		/* ONION OMEGA */
+ 	ATH79_MACH_PB42,		/* Atheros PB42 */
+ 	ATH79_MACH_PB92,		/* Atheros PB92 */
++	ATH79_MACH_PINEAPPLE_NANO,	/* Hak5 WiFi Pineapple NANO */
++	ATH79_MACH_PINEAPPLE_TETRA,	/* Hak5 WiFi Pineapple TETRA */
+ 	ATH79_MACH_QIHOO_C301,		/* Qihoo 360 C301 */
+ 	ATH79_MACH_R6100,		/* NETGEAR R6100 */
+ 	ATH79_MACH_RB_411,		/* MikroTik RouterBOARD 411/411A/411AH */

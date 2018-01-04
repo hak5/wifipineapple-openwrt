@@ -509,6 +509,14 @@ wndr3700)
 	uci set network.@switch_port[-1].led='2'
 	;;
 
+pineapple-nano)
+	ucidef_set_interface_lan "eth0"
+	;;
+
+pineapple-tetra)
+	ucidef_set_interfaces_lan_wan "eth1" "eth0"
+	;;
+
 *)
 	ucidef_set_interfaces_lan_wan "eth0" "eth1"
 	;;

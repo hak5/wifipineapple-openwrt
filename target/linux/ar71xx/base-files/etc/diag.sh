@@ -233,6 +233,12 @@ get_status_led() {
 	oolite)
 		status_led="oolite:red:system"
 		;;
+	pineapple-nano)
+		status_led="nano:blue"
+		;;
+	pineapple-tetra)
+		status_led="tetra:blue"
+		;;
 	qihoo-c301)
 		status_led="qihoo:green:status"
 		;;

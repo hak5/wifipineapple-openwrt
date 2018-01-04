@@ -323,6 +323,7 @@ platform_check_image() {
 	minibox-v1 |\
 	onion-omega | \
 	oolite | \
+	pineapple-nano | \
 	smart-300 | \
 	tl-mr10u | \
 	tl-mr11u | \
@@ -425,7 +426,8 @@ platform_check_image() {
 	nbg6716 | \
 	r6100 | \
 	wndr3700v4 | \
-	wndr4300 )
+	wndr4300 | \
+	pineapple-tetra)
 		nand_do_platform_check $board $1
 		return $?;
 		;;

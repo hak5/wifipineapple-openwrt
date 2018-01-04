@@ -35,6 +35,7 @@
 #define HWID_GL_INET_V1		0x08000001
 #define HWID_GS_OOLITE_V1	0x3C000101
 #define HWID_ONION_OMEGA	0x04700001
+#define HWID_PINEAPPLE_NANO	0x4e414e4f
 #define HWID_TL_MR10U_V1	0x00100101
 #define HWID_TL_MR13U_V1	0x00130101
 #define HWID_TL_MR3020_V1	0x30200001
@@ -429,6 +430,11 @@ static struct board_info boards[] = {
 	}, {
 		.id		= "ONION-OMEGA",
 		.hw_id		= HWID_ONION_OMEGA,
+		.hw_rev		= 1,
+		.layout_id	= "16Mlzma",
+	}, {
+		.id		= "PINEAPPLE-NANO",
+		.hw_id		= HWID_PINEAPPLE_NANO,
 		.hw_rev		= 1,
 		.layout_id	= "16Mlzma",
 	}, {
